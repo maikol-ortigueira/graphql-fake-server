@@ -4,19 +4,30 @@ import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import { promises as fs } from 'fs';
 
-// Para su funcionamiento deberás crear una carpeta en data/ con los archivos JSON
-// y cambiar la variable aplicacion por el nombre de la carpeta
-// siempre deberá haber un archivo llamado users.json con los usuarios
-const aplicacion = 'example';
+// Obtener la ruta del directorio actual
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
-const PORT = 3001;
+// Leer configuración desde config.json
+const loadConfig = async () => {
+    try {
+        const configPath = join(__dirname, 'config.json');
+        const configContent = await fs.readFile(configPath, 'utf-8');
+        return JSON.parse(configContent);
+    } catch (error) {
+        console.error('❌ Error al cargar config.json:', error.message);
+        process.exit(1); // Salir si no se puede cargar la configuración
+    }
+};
+
+const config = await loadConfig();
+const aplicacion = config.src || 'example'; // Cambia 'default' por el nombre de tu aplicación si es necesario
+const PORT = config.port || 3000; // Cambia el puerto si es necesario
+
 // carpeta con los archivos JSON
 const DATA_DIR = `data/${aplicacion}`;
 
 const app = express();
 
-// Obtener la ruta del directorio actual
-const __dirname = dirname(fileURLToPath(import.meta.url));
 
 const loadData = async () => {
     const dataDir = join(__dirname, DATA_DIR);
